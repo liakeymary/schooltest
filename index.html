@@ -3,22 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Activity Card Flip Game 🎮</title>
+    <title>My First Web Game</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
-            background-color: #f0f4f8;
+            background-color: #f4f7f6;
             margin: 0;
             padding: 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
         }
-        h1 {
-            color: #2d3748;
-            margin-bottom: 20px;
+        h1 { color: #2d3748; margin-bottom: 20px; }
+        
+        /* 카드 섞기 버튼 스타일 */
+        .shuffle-btn {
+            background-color: #4299e1;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: background-color 0.2s;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
-        /* 24개 카드를 정렬하는 바둑판 (가로 6개씩) */
+        .shuffle-btn:hover { background-color: #3182ce; }
+        .shuffle-btn:active { transform: translateY(1px); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .shuffle-btn .icon { font-size: 20px; }
+
+        /* 6x4 카드 바둑판 */
         .grid-container {
             display: grid;
             grid-template-columns: repeat(6, 1fr);
@@ -26,13 +45,9 @@
             max-width: 1000px;
             width: 100%;
         }
-        /* 모바일 화면 대응 (화면이 작아지면 가로 3개씩) */
-        @media (max-width: 768px) {
-            .grid-container {
-                grid-template-columns: repeat(3, 1fr);
-            }
-        }
-        /* 카드 3D 효과를 위한 설정 */
+        @media (max-width: 768px) { grid-template-columns: repeat(3, 1fr); gap: 10px; }
+
+        /* 카드 3D 뒤집기 설정 */
         .card {
             aspect-ratio: 3 / 4;
             perspective: 1000px;
@@ -48,11 +63,9 @@
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
             border-radius: 10px;
         }
-        /* 클릭해서 .flipped 클래스가 붙으면 뒤집어짐 */
-        .card.flipped .card-inner {
-            transform: rotateY(180deg);
-        }
-        /* 카드 앞면과 뒷면 공통 스타일 */
+        .card.flipped .card-inner { transform: rotateY(180deg); }
+
+        /* 앞면/뒷면 공통 */
         .card-front, .card-back {
             position: absolute;
             width: 100%;
@@ -65,8 +78,10 @@
             justify-content: center;
             box-sizing: border-box;
             padding: 10px;
+            border: 2px solid #ddd;
         }
-        /* 카드 뒷면 (처음에 보이는 면) */
+
+        /* 뒷면 (번호 표시) */
         .card-back {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -74,86 +89,82 @@
             font-weight: bold;
             border: 2px solid #fff;
         }
-        /* 카드 앞면 (클릭하면 보이는 면) */
+
+        /* 앞면 (이미지/텍스트 표시) */
         .card-front {
             background-color: white;
             color: #333;
             transform: rotateY(180deg);
-            border: 2px solid #764ba2;
         }
         .card-front img {
-            width: 80%;
+            width: 90%;
             height: auto;
             max-height: 70%;
             object-fit: contain;
             border-radius: 5px;
             margin-bottom: 8px;
         }
-        .card-front span {
-            font-size: 14px;
-            font-weight: bold;
-            color: #4a5568;
-        }
+        .card-front span { font-size: 14px; font-weight: bold; color: #4a5568; }
     </style>
 </head>
 <body>
 
     <h1>Find the Activity! 🌟</h1>
     
+    <button class="shuffle-btn" onclick="shuffleCards()">
+        <span class="icon">🔄</span> Card Shuffle
+    </button>
+    
     <div class="grid-container" id="cardGrid">
         </div>
 
 <script>
-    // 24개 카드에 들어갈 데이터 (우선 보내주신 이미지 이름과 텍스트로 채웠습니다)
-    // 이미지 파일이 없는 9~24번은 우선 임시 텍스트로 처리해두었습니다.
+    // 24개 카드 데이터 전체를 새롭고 다양한 활동으로 채웠습니다.
     const cardData = [
-        { id: 1, text: "Get up", img: "get up.jpg" },
-        { id: 2, text: "Exercise", img: "exercise.jpg" },
-        { id: 3, text: "Walk the dog", img: "walk the dog.jpg" },
-        { id: 4, text: "Get home", img: "get home.jpg" },
-        { id: 5, text: "Go to school", img: "go to school.jpg" },
-        { id: 6, text: "Have dinner", img: "have dinner.jpg" },
-        { id: 7, text: "Take a bath", img: "take a bath.jpg" },
-        { id: 8, text: "Go to bed", img: "go to bed.jpg" },
-        // 9번부터 24번까지 임시 데이터 (나중에 텍스트와 이미지를 바꾸시면 됩니다!)
-        { id: 9, text: "Activity 9", img: "" }, { id: 10, text: "Activity 10", img: "" },
-        { id: 11, text: "Activity 11", img: "" }, { id: 12, text: "Activity 12", img: "" },
-        { id: 13, text: "Activity 13", img: "" }, { id: 14, text: "Activity 14", img: "" },
-        { id: 15, text: "Activity 15", img: "" }, { id: 16, text: "Activity 16", img: "" },
-        { id: 17, text: "Activity 17", img: "" }, { id: 18, text: "Activity 18", img: "" },
-        { id: 19, text: "Activity 19", img: "" }, { id: 20, text: "Activity 20", img: "" },
-        { id: 21, text: "Activity 21", img: "" }, { id: 22, text: "Activity 22", img: "" },
-        { id: 23, text: "Activity 23", img: "" }, { id: 24, text: "Activity 24", img: "" }
+        { text: "Get up", img: "get up.jpg" }, { text: "Exercise", img: "exercise.jpg" }, { text: "Walk the dog", img: "walk the dog.jpg" }, { text: "Get home", img: "get home.jpg" }, { text: "Go to school", img: "go to school.jpg" }, { text: "Have dinner", img: "have dinner.jpg" }, { text: "Take a bath", img: "take a bath.jpg" }, { text: "Go to bed", img: "go to bed.jpg" },
+        // 9~24번 새로운 데이터
+        { text: "Do homework", img: "do homework.jpg" }, { text: "Play baseball", img: "play baseball.jpg" }, { text: "Read a book", img: "read a book.jpg" }, { text: "Eat lunch", img: "eat lunch.jpg" }, { text: "Ride a bike", img: "ride a bike.jpg" }, { text: "Learn English", img: "learn english.jpg" }, { text: "Clean my room", img: "clean my room.jpg" }, { text: "Play piano", img: "play piano.jpg" },
+        { text: "Draw a picture", img: "draw a picture.jpg" }, { text: "Swim", img: "swim.jpg" }, { text: "Watch a movie", img: "watch a movie.jpg" }, { text: "Play soccer", img: "play soccer.jpg" }, { text: "Sing a song", img: "sing a song.jpg" }, { text: "Help a friend", img: "help a friend.jpg" }, { text: "Science experiment", img: "science experiment.jpg" }, { text: "Listen to music", img: "listen to music.jpg" }
     ];
 
     const gridContainer = document.getElementById('cardGrid');
 
-    // 화면에 24개 카드 생성하기
-    cardData.forEach(data => {
-        const card = document.createElement('div');
-        card.className = 'card';
+    // 카드 생성 함수
+    function createCards(dataList) {
+        gridContainer.innerHTML = ''; // 기존 카드 제거
+        dataList.forEach((data, index) => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.onclick = function() { this.classList.toggle('flipped'); };
+            card.innerHTML = `
+                <div class="card-inner">
+                    <div class="card-front">
+                        <img src="${data.img}" alt="${data.text}">
+                        <span>${data.text}</span>
+                    </div>
+                    <div class="card-back">${index + 1}</div>
+                </div>
+            `;
+            gridContainer.appendChild(card);
+        });
+    }
+
+    // 카드 섞기 함수 (Fisher-Yates 알고리즘)
+    function shuffleCards() {
+        // 모든 카드를 뒷면으로 초기화
+        document.querySelectorAll('.card').forEach(c => c.classList.remove('flipped'));
         
-        // 클릭하면 뒤집히는 기능 토글 (한 번 더 누르면 다시 뒷면이 됨)
-        card.onclick = function() {
-            this.classList.toggle('flipped');
-        };
+        // 데이터 배열을 랜덤하게 섞음
+        for (let i = cardData.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [cardData[i], cardData[j]] = [cardData[j], cardData[i]];
+        }
+        // 섞인 데이터로 카드 다시 생성
+        setTimeout(() => createCards(cardData), 400); // 부드럽게 뒷면으로 돌아간 뒤 섞이도록 지연
+    }
 
-        // 이미지 경로 설정 (이미지가 없으면 텍스트만 표시)
-        const imgTag = data.img ? `<img src="${data.img}" alt="${data.text}">` : `<div style="font-size:40px; margin-bottom:10px;">❓</div>`;
-
-        card.innerHTML = `
-            <div class="card-inner">
-                <div class="card-front">
-                    ${imgTag}
-                    <span>${data.text}</span>
-                </div>
-                <div class="card-back">
-                    ${data.id}
-                </div>
-            </div>
-        `;
-        gridContainer.appendChild(card);
-    });
+    // 초기 카드 생성
+    createCards(cardData);
 </script>
 
 </body>
